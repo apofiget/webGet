@@ -73,7 +73,7 @@ urlToFileBs url = do
 	case parseURI url of
 		Nothing -> return ()
 		Just uri -> do 
-			r <- openURIWithOpts [CurlFollowLocation False, CurlAutoReferer True, CurlTimeout 10, userAgent] url
+			r <- openURIWithOpts [CurlFollowLocation True, CurlAutoReferer True, CurlTimeout 10, userAgent] url
 			let
 			     	cont = case r of
 					Left _ -> BS.empty
@@ -96,8 +96,8 @@ normalizePath name url =
 pathToUrl :: String -> URI -> String
 pathToUrl name url = 
 	if startswith "/" name
-		then scheme ++ user ++ reg ++ port ++ name
-		else scheme ++ user ++ reg ++ port ++ path ++ name
+		then foldl (++) "" [scheme, user, reg, port, name]
+		else foldl (++)  "" [scheme, user, reg, port, path, name]
 	where
 		scheme = uriScheme url ++ "//"
 		Just a  = uriAuthority url
@@ -143,7 +143,7 @@ userAgent = CurlUserAgent "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.4 (KHTM
 uri2String :: URI -> String
 uri2String uri =
 	 let Just a  = uriAuthority uri
-	 in uriScheme uri ++ "//" ++ uriUserInfo a ++ uriRegName a ++ uriPort a ++ uriPath uri ++ uriQuery uri ++ uriFragment uri
+	 in foldl (++) "" [uriScheme uri, "//", uriUserInfo a, uriRegName a, uriPort a, uriPath uri, uriQuery uri, uriFragment uri]
 
 forkFor :: [String]
 forkFor = [".html", ".htm", ".php", ".cgi", ".pl", ".py", ".asp", ".shtml", ".yaws", ".jsp"]

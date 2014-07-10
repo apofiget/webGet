@@ -1,0 +1,3 @@
+cabal build
+cd dist/build/webGet
+./webGet <anyURL>

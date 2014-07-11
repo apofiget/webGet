@@ -49,7 +49,7 @@ doMirror uri cwd = do
                                 then case parseURI x of
                                        Just a -> void (putStrLn ("Fork for " ++ show x) >> forkIO (doMirror a cwd))
                                        Nothing -> return ()
-                                else putStrLn ("Download " ++ x) >> urlToFileBs x 
+                                else putStrLn ("Download " ++ x) >> urlToFileBs x cwd
                     )
                 createDirectoryIfMissing True (cwd ++ dir) 
                 writeFile (cwd ++ dir ++ "/" ++ normalizeFileName urlStr) doc
@@ -62,9 +62,8 @@ doesLocalExists uri cwd =
   Just a -> doesFileExist $ normalise $ cwd ++ uriPath a
 
 
-urlToFileBs :: String -> IO ()
-urlToFileBs url = do
-    cwd <- getCurrentDirectory
+urlToFileBs :: String -> FilePath -> IO ()
+urlToFileBs url cwd =
     case parseURI url of
         Nothing -> return ()
         Just uri -> do 

@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                webGet
-version:             0.2.0.0
+version:             0.2.1.0
 synopsis:            Simple download tool
 description:         Simple download tool
 homepage:            https://plus.google.com/u/0/+AndreyAndruschenko

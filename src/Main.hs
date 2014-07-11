@@ -2,6 +2,8 @@
 
 import Control.Monad
 import Control.Concurrent
+import Data.Functor ((<$>))
+import Data.Maybe (fromMaybe)
 import System.Environment
 import System.FilePath.Posix
 import System.Directory
@@ -20,13 +22,10 @@ main = do
     cwd <- getCurrentDirectory
     case parseURI arg of
         Nothing -> putStrLn $ "Invalid URI: " ++ arg
-        Just uri -> let 
-                      Just reg = uriAuthority uri
-                      siteDir = uriRegName reg
-                    in
-                      createDirectoryIfMissing True siteDir >>
-                      setCurrentDirectory siteDir >>
-                      doMirror uri (cwd ++ "/" ++ siteDir)
+        Just uri -> let siteDir = fromMaybe "./" $ uriRegName <$> uriAuthority uri
+                    in do createDirectoryIfMissing True siteDir
+                          setCurrentDirectory siteDir
+                          doMirror uri (cwd ++ "/" ++ siteDir)
 
 doMirror :: URI -> FilePath -> IO ()
 doMirror uri cwd = do
@@ -93,10 +92,9 @@ pathToUrl name url =
         else foldl (++)  "" [scheme, user, reg, port, path, name]
     where
         scheme = uriScheme url ++ "//"
-        Just a  = uriAuthority url
-        user = uriUserInfo a
-        reg = uriRegName a 
-        port = uriPort a
+        user = fromMaybe "" $ uriUserInfo <$> uriAuthority url
+        reg = fromMaybe "" $ uriRegName <$> uriAuthority url
+        port = fromMaybe "" $ uriPort <$> uriAuthority url
         path = uriPath url
 
 normalizeFileName :: String -> String
@@ -115,10 +113,9 @@ makeDlList url = foldl (\acc t ->
                                   else normalizePath (fromAttrib "src" t) url : acc
         TagOpen "a" _ -> let 
                             scheme = uriScheme url ++ "//"
-                            Just a  = uriAuthority url
-                            user = uriUserInfo a
-                            reg = uriRegName a 
-                            port = uriPort a
+                            user = fromMaybe "" $ uriUserInfo <$> uriAuthority url
+                            reg = fromMaybe "" $ uriRegName <$> uriAuthority url
+                            port = fromMaybe "" $ uriPort <$> uriAuthority url
                             path = uriPath url
                             ref = normalizePath (fromAttrib "href" t) url
                           in if startswith (scheme ++ user ++ reg ++ port ++ path) ref

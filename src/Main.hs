@@ -10,8 +10,7 @@ import Network.Curl.Opts
 import Network.URI
 import Text.HTML.TagSoup.Match()
 import Text.HTML.TagSoup
-import qualified Data.Char as C
-import qualified Data.List as L
+import Data.Char (toLower)
 import qualified Data.ByteString as BS
 import Data.String.Utils
 
@@ -79,7 +78,7 @@ urlToFileBs url cwd =
 
 
 strToLower :: String -> String
-strToLower = map C.toLower
+strToLower = map toLower
 
 normalizePath :: String -> URI -> String
 normalizePath name url = 
@@ -107,7 +106,7 @@ normalizeFileName name =
         file -> head $ split "#" file
 
 makeDlList :: URI -> [Tag String] -> [String]
-makeDlList url = L.foldl (\acc t -> 
+makeDlList url = foldl (\acc t -> 
     case t of
         TagOpen "img" _ -> normalizePath (fromAttrib "src" t) url : acc
         TagOpen "link" _ -> normalizePath (fromAttrib "href" t) url : acc

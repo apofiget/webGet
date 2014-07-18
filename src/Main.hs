@@ -4,6 +4,10 @@ import Control.Monad
 import Control.Concurrent
 import Data.Functor ((<$>))
 import Data.Maybe (fromMaybe)
+import Data.Char (toLower)
+import qualified Data.ByteString as BS
+import Data.List.Utils (uniq)
+import Data.String.Utils
 import System.Environment
 import System.FilePath.Posix
 import System.Directory
@@ -12,9 +16,7 @@ import Network.Curl.Opts
 import Network.URI
 import Text.HTML.TagSoup.Match()
 import Text.HTML.TagSoup
-import Data.Char (toLower)
-import qualified Data.ByteString as BS
-import Data.String.Utils
+
 
 main :: IO ()
 main = do
@@ -35,11 +37,10 @@ doMirror uri cwd = do
         Left err -> putStrLn $ "Download error: " ++ err
         Right doc -> 
             let 
-                tagList = parseTags doc
-                urlList = makeDlList uri tagList
+                urlList = makeDlList uri $ parseTags doc
                 dir = takeDirectory $ uriPath uri
             in do 
-                forM_ (foldl (\acc a -> if a `elem` acc then acc else a:acc ) [] urlList)
+                forM_ (uniq urlList)
                     (\x -> do
                         isExists <- doesLocalExists x cwd
                         unless isExists $
